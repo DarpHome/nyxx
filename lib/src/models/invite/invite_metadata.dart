@@ -17,6 +17,7 @@ class InviteWithMetadata extends Invite {
   final DateTime createdAt;
 
   InviteWithMetadata({
+    required super.type,
     required super.code,
     required super.guild,
     required super.channel,
