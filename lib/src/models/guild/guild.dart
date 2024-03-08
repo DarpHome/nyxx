@@ -206,9 +206,15 @@ class UserGuild extends PartialGuild {
   final String? iconHash;
 
   /// Whether this guild is owned by the current user.
+  ///
+  /// {@template get_current_user_guilds_only}
+  /// This field is only present when fetching the current user's guilds.
+  /// {@endtemplate}
   final bool? isOwnedByCurrentUser;
 
   /// The current user's permissions.
+  ///
+  /// {@macro get_current_user_guilds_only}
   final Permissions? currentUserPermissions;
 
   /// A set of features enabled in this guild.
