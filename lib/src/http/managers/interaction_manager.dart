@@ -35,6 +35,7 @@ class InteractionManager {
   Interaction<dynamic> parse(Map<String, Object?> raw) {
     final type = InteractionType.parse(raw['type'] as int);
     final guildId = maybeParse(raw['guild_id'], Snowflake.parse);
+    final guild = maybeParse(raw['guild'], client.guilds.parseInteractionGuild);
     final channelId = maybeParse(raw['channel_id'], Snowflake.parse);
     final id = Snowflake.parse(raw['id']!);
     final applicationId = Snowflake.parse(raw['application_id']!);
@@ -68,6 +69,7 @@ class InteractionManager {
           id: id,
           applicationId: applicationId,
           type: type,
+          guild: guild,
           guildId: guildId,
           channel: channel,
           channelId: channelId,
@@ -89,6 +91,7 @@ class InteractionManager {
           applicationId: applicationId,
           type: type,
           data: parseApplicationCommandInteractionData(raw['data'] as Map<String, Object?>, guildId: guildId, channelId: channelId),
+          guild: guild,
           guildId: guildId,
           channel: channel,
           channelId: channelId,
@@ -110,6 +113,7 @@ class InteractionManager {
           applicationId: applicationId,
           type: type,
           data: parseMessageComponentInteractionData(raw['data'] as Map<String, Object?>, guildId: guildId, channelId: channelId),
+          guild: guild,
           guildId: guildId,
           channel: channel,
           channelId: channelId,
@@ -131,6 +135,7 @@ class InteractionManager {
           applicationId: applicationId,
           type: type,
           data: parseModalSubmitInteractionData(raw['data'] as Map<String, Object?>),
+          guild: guild,
           guildId: guildId,
           channel: channel,
           channelId: channelId,
@@ -152,6 +157,7 @@ class InteractionManager {
           applicationId: applicationId,
           type: type,
           data: parseApplicationCommandInteractionData(raw['data'] as Map<String, Object?>, guildId: guildId, channelId: channelId),
+          guild: guild,
           guildId: guildId,
           channel: channel,
           channelId: channelId,

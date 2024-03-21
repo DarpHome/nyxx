@@ -91,6 +91,16 @@ class GuildManager extends Manager<Guild> {
     );
   }
 
+  /// Parse [InteractionGuild] from [raw].
+  InteractionGuild parseInteractionGuild(Map<String, Object?> raw) {
+    return InteractionGuild(
+      id: Snowflake.parse(raw['id']!),
+      manager: this,
+      features: parseGuildFeatures(raw['features'] as List),
+      locale: Locale.parse(raw['locale'] as String),
+    );
+  }
+
   /// Parse [UserGuild] from [raw].
   UserGuild parseUserGuild(Map<String, Object?> raw) {
     final id = Snowflake.parse(raw['id']!);

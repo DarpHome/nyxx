@@ -72,6 +72,9 @@ abstract class Interaction<T> with ToStringHelper {
   /// The data payload associated with this interaction.
   final T data;
 
+  /// The guild in which this interaction was triggered.
+  final InteractionGuild? guild;
+
   /// The ID of the guild this interaction was triggered in.
   final Snowflake? guildId;
 
@@ -122,6 +125,7 @@ abstract class Interaction<T> with ToStringHelper {
     required this.applicationId,
     required this.type,
     required this.data,
+    required this.guild,
     required this.guildId,
     required this.channel,
     required this.channelId,
@@ -137,9 +141,6 @@ abstract class Interaction<T> with ToStringHelper {
     required this.authorizingIntegrationOwners,
     required this.context,
   });
-
-  /// The guild in which this interaction was triggered.
-  PartialGuild? get guild => guildId == null ? null : manager.client.guilds[guildId!];
 }
 
 mixin MessageResponse<T> on Interaction<T> {
@@ -228,6 +229,7 @@ class PingInteraction extends Interaction<void> {
     required super.id,
     required super.applicationId,
     required super.type,
+    required super.guild,
     required super.guildId,
     required super.channel,
     required super.channelId,
@@ -261,6 +263,7 @@ class ApplicationCommandInteraction extends Interaction<ApplicationCommandIntera
     required super.applicationId,
     required super.type,
     required super.data,
+    required super.guild,
     required super.guildId,
     required super.channel,
     required super.channelId,
@@ -291,6 +294,7 @@ class MessageComponentInteraction extends Interaction<MessageComponentInteractio
     required super.applicationId,
     required super.type,
     required super.data,
+    required super.guild,
     required super.guildId,
     required super.channel,
     required super.channelId,
@@ -376,6 +380,7 @@ class ModalSubmitInteraction extends Interaction<ModalSubmitInteractionData> wit
     required super.applicationId,
     required super.type,
     required super.data,
+    required super.guild,
     required super.guildId,
     required super.channel,
     required super.channelId,
@@ -405,6 +410,7 @@ class ApplicationCommandAutocompleteInteraction extends Interaction<ApplicationC
     required super.applicationId,
     required super.type,
     required super.data,
+    required super.guild,
     required super.guildId,
     required super.channel,
     required super.channelId,

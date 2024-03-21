@@ -198,6 +198,17 @@ class PartialGuild extends WritableSnowflakeEntity<Guild> {
 }
 
 /// {@macro guild}
+class InteractionGuild extends PartialGuild {
+  /// A set of features enabled in this guild.
+  final GuildFeatures features;
+
+  /// This guild's locale.
+  final Locale locale;
+
+  InteractionGuild({required super.id, required super.manager, required this.features, required this.locale});
+}
+
+/// {@macro guild}
 class UserGuild extends PartialGuild {
   /// This guild's name.
   final String name;
