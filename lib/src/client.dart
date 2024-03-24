@@ -17,6 +17,7 @@ import 'package:nyxx/src/intents.dart';
 import 'package:nyxx/src/manager_mixin.dart';
 import 'package:nyxx/src/api_options.dart';
 import 'package:nyxx/src/models/application.dart';
+import 'package:nyxx/src/models/gateway/events/interaction.dart';
 import 'package:nyxx/src/models/guild/guild.dart';
 import 'package:nyxx/src/models/interaction.dart';
 import 'package:nyxx/src/models/snowflake.dart';
@@ -351,7 +352,7 @@ class NyxxGateway with ManagerMixin, EventMixin implements NyxxRest {
   }
 }
 
-class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
+class NyxxHttpInteractions with ManagerMixin, InteractionsMixin implements NyxxRest {
   @override
   final HttpInteractionsApiOptions apiOptions;
 
@@ -369,8 +370,6 @@ class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
 
   final Ed25519 _ed25519;
   final PublicKey _publicKey;
-
-  final List<Future<InteractionResponseBuilder?> Function(Interaction<dynamic>)> _handlers = [];
 
   NyxxHttpInteractions._(this.apiOptions, this.options)
       : _ed25519 = Ed25519(),
@@ -400,7 +399,10 @@ class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
   @override
   Future<void> close() {
     logger.info('Closing client');
-    return _doClose(this, () async => httpHandler.close(), options.plugins);
+    return _doClose(this, () async {
+      httpHandler.close();
+      await _interactions.close();
+    }, options.plugins);
   }
 
   @override
@@ -415,22 +417,10 @@ class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
   @override
   PartialUser get user => _user;
 
-  void _onInteractionCreate<T extends Interaction<U>, U>(Future<InteractionResponseBuilder?> Function(T) handler) {
-    _handlers.add((interaction) async {
-      if (interaction is T) {
-        return handler(interaction);
-      }
-      return null;
-    });
-  }
+  final StreamController<InteractionCreateEvent> _interactions = StreamController.broadcast();
 
-  void onInteractionCreate(Future<InteractionResponseBuilder?> Function(PingInteraction) handler) => _onInteractionCreate(handler);
-  void onPingInteraction(Future<InteractionResponseBuilder?> Function(PingInteraction) handler) => _onInteractionCreate(handler);
-  void onApplicationCommandInteraction(Future<InteractionResponseBuilder?> Function(ApplicationCommandInteraction) handler) => _onInteractionCreate(handler);
-  void onMessageComponentInteraction(Future<InteractionResponseBuilder?> Function(MessageComponentInteraction) handler) => _onInteractionCreate(handler);
-  void onModalSubmitInteraction(Future<InteractionResponseBuilder?> Function(ModalSubmitInteraction) handler) => _onInteractionCreate(handler);
-  void onApplicationCommandAutocompleteInteraction(Future<InteractionResponseBuilder?> Function(ApplicationCommandAutocompleteInteraction) handler) =>
-      _onInteractionCreate(handler);
+  @override
+  Stream<InteractionCreateEvent> get onInteractionCreate => _interactions.stream;
 
   Future<Response> handle(Request request) async {
     if (request.headers
@@ -460,18 +450,27 @@ class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
         return Response.badRequest();
       }
       final interaction = interactions.parse(json);
-      InteractionResponseBuilder? responseBuilder;
-      for (final handler in _handlers) {
-        responseBuilder = await handler(interaction);
-        if (responseBuilder != null) break;
+      if (interaction is PingInteraction) {
+        return Response.ok(jsonEncode(InteractionResponseBuilder.pong().build()), headers: {'content-type': 'application/json'});
       }
-      if (interaction is PingInteraction && responseBuilder == null) {
-        responseBuilder = InteractionResponseBuilder.pong();
+      final completer = Completer<InteractionResponseBuilder>();
+      interaction.completer = completer;
+      _interactions.add(switch (interaction.type) {
+        InteractionType.ping => InteractionCreateEvent<PingInteraction>(client: this, interaction: interaction as PingInteraction),
+        InteractionType.applicationCommand =>
+          InteractionCreateEvent<ApplicationCommandInteraction>(client: this, interaction: interaction as ApplicationCommandInteraction),
+        InteractionType.messageComponent =>
+          InteractionCreateEvent<MessageComponentInteraction>(client: this, interaction: interaction as MessageComponentInteraction),
+        InteractionType.modalSubmit => InteractionCreateEvent<ModalSubmitInteraction>(client: this, interaction: interaction as ModalSubmitInteraction),
+        InteractionType.applicationCommandAutocomplete => InteractionCreateEvent<ApplicationCommandAutocompleteInteraction>(
+            client: this, interaction: interaction as ApplicationCommandAutocompleteInteraction),
+      } as InteractionCreateEvent<Interaction<dynamic>>);
+      try {
+        InteractionResponseBuilder responseBuilder = await completer.future.timeout(Duration(seconds: 5));
+        return Response.ok(jsonEncode(responseBuilder.build()), headers: {'content-type': 'application/json'});
+      } on TimeoutException {
+        return Response.internalServerError(body: 'No interaction handler was found, or it timeouted.');
       }
-      if (responseBuilder == null) {
-        return Response.internalServerError(body: 'No interaction handler was found.');
-      }
-      return Response.ok(jsonEncode(responseBuilder.build()), headers: {'content-type': 'application/json'});
     } else {
       return await options.onInvalidRequest(request);
     }

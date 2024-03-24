@@ -36,12 +36,16 @@ class RawDispatchEvent extends GatewayEvent {
 /// The base class for all events sent by dispatch.
 /// {@endtemplate}
 abstract class DispatchEvent extends GatewayEvent {
+  final Gateway? _gateway;
+
   /// The gateway that handled this event.
-  final Gateway gateway;
+  Gateway get gateway => _gateway!;
 
   /// {@macro dispatch_event}
   /// @nodoc
-  DispatchEvent({required this.gateway}) : super(opcode: Opcode.dispatch);
+  DispatchEvent({required Gateway? gateway})
+      : _gateway = gateway,
+        super(opcode: Opcode.dispatch);
 }
 
 /// {@template unknown_dispatch_event}

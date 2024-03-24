@@ -321,7 +321,7 @@ export 'src/plugin/plugin.dart' show NyxxPlugin, NyxxPluginState;
 export 'src/plugin/logging.dart' show Logging, logging;
 export 'src/plugin/cli_integration.dart' show CliIntegration, cliIntegration;
 export 'src/plugin/ignore_exceptions.dart' show IgnoreExceptions, ignoreExceptions;
-// export 'src/http_interactions/http_interactions.dart' show;
+export 'src/event_mixin.dart' show InteractionsMixin;
 
 // Types also used in the nyxx API from other packages
 export 'package:http/http.dart'

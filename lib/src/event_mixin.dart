@@ -19,6 +19,34 @@ import 'package:nyxx/src/models/gateway/events/webhook.dart';
 import 'package:nyxx/src/models/interaction.dart';
 import 'package:nyxx/src/utils/iterable_extension.dart';
 
+abstract class WithInteractionsStream {
+  Stream<InteractionCreateEvent> get onInteractionCreate;
+}
+
+/// An internal mixin to add interactions stream to a NyxxGateway or NyxxHttpInteractions client.
+mixin InteractionsMixin implements WithInteractionsStream {
+  // Specializations of [onInteraction] for convenience.
+
+  /// A [Stream] of [PingInteraction]s received by this client.
+  Stream<InteractionCreateEvent<PingInteraction>> get onPingInteraction => onInteractionCreate.whereType<InteractionCreateEvent<PingInteraction>>();
+
+  /// A [Stream] of [ApplicationCommandInteraction]s received by this client.
+  Stream<InteractionCreateEvent<ApplicationCommandInteraction>> get onApplicationCommandInteraction =>
+      onInteractionCreate.whereType<InteractionCreateEvent<ApplicationCommandInteraction>>();
+
+  /// A [Stream] of [MessageComponentInteraction]s received by this client.
+  Stream<InteractionCreateEvent<MessageComponentInteraction>> get onMessageComponentInteraction =>
+      onInteractionCreate.whereType<InteractionCreateEvent<MessageComponentInteraction>>();
+
+  /// A [Stream] of [ModalSubmitInteraction]s received by this client.
+  Stream<InteractionCreateEvent<ModalSubmitInteraction>> get onModalSubmitInteraction =>
+      onInteractionCreate.whereType<InteractionCreateEvent<ModalSubmitInteraction>>();
+
+  /// A [Stream] of [ApplicationCommandAutocompleteInteraction]s received by this client.
+  Stream<InteractionCreateEvent<ApplicationCommandAutocompleteInteraction>> get onApplicationCommandAutocompleteInteraction =>
+      onInteractionCreate.whereType<InteractionCreateEvent<ApplicationCommandAutocompleteInteraction>>();
+}
+
 /// An internal mixin to add event streams to a NyxxGateway client.
 mixin EventMixin implements Nyxx {
   /// A [Stream] of gateway dispatch events received by this client.

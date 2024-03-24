@@ -1006,14 +1006,14 @@ class Gateway extends GatewayManager with EventParser {
 
     // Needed to get proper type promotion.
     return switch (interaction.type) {
-      InteractionType.ping => InteractionCreateEvent<PingInteraction>(gateway: this, interaction: interaction as PingInteraction),
+      InteractionType.ping => InteractionCreateEvent<PingInteraction>(client: client, interaction: interaction as PingInteraction),
       InteractionType.applicationCommand =>
-        InteractionCreateEvent<ApplicationCommandInteraction>(gateway: this, interaction: interaction as ApplicationCommandInteraction),
+        InteractionCreateEvent<ApplicationCommandInteraction>(client: client, interaction: interaction as ApplicationCommandInteraction),
       InteractionType.messageComponent =>
-        InteractionCreateEvent<MessageComponentInteraction>(gateway: this, interaction: interaction as MessageComponentInteraction),
-      InteractionType.modalSubmit => InteractionCreateEvent<ModalSubmitInteraction>(gateway: this, interaction: interaction as ModalSubmitInteraction),
-      InteractionType.applicationCommandAutocomplete =>
-        InteractionCreateEvent<ApplicationCommandAutocompleteInteraction>(gateway: this, interaction: interaction as ApplicationCommandAutocompleteInteraction),
+        InteractionCreateEvent<MessageComponentInteraction>(client: client, interaction: interaction as MessageComponentInteraction),
+      InteractionType.modalSubmit => InteractionCreateEvent<ModalSubmitInteraction>(client: client, interaction: interaction as ModalSubmitInteraction),
+      InteractionType.applicationCommandAutocomplete => InteractionCreateEvent<ApplicationCommandAutocompleteInteraction>(
+          client: client, interaction: interaction as ApplicationCommandAutocompleteInteraction),
     } as InteractionCreateEvent<Interaction<dynamic>>;
   }
 

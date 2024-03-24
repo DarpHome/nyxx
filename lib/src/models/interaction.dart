@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:nyxx/src/builders/application_command.dart';
 import 'package:nyxx/src/builders/builder.dart';
 import 'package:nyxx/src/builders/interaction_response.dart';
@@ -114,6 +115,9 @@ abstract class Interaction<T> with ToStringHelper {
   /// Context where the interaction was triggered from.
   final InteractionContextType? context;
 
+  /// @nodoc
+  Completer<InteractionResponseBuilder>? completer;
+
   /// {@macro interaction}
   /// @nodoc
   Interaction({
@@ -140,6 +144,10 @@ abstract class Interaction<T> with ToStringHelper {
 
   /// The guild in which this interaction was triggered.
   PartialGuild? get guild => guildId == null ? null : manager.client.guilds[guildId!];
+
+  /// Create a response to an interaction.
+  Future<void> createResponse(InteractionResponseBuilder builder) async =>
+      completer != null ? completer!.complete(builder) : await manager.createResponse(id, token, builder);
 }
 
 mixin MessageResponse<T> on Interaction<T> {
@@ -157,7 +165,7 @@ mixin MessageResponse<T> on Interaction<T> {
     _didAcknowledge = true;
     _wasEphemeral = isEphemeral;
 
-    await manager.createResponse(id, token, InteractionResponseBuilder.deferredChannelMessage(isEphemeral: isEphemeral));
+    await createResponse(InteractionResponseBuilder.deferredChannelMessage(isEphemeral: isEphemeral));
   }
 
   /// Send a response to this interaction.
@@ -171,7 +179,7 @@ mixin MessageResponse<T> on Interaction<T> {
       _didRespond = true;
       _wasEphemeral = isEphemeral;
 
-      await manager.createResponse(id, token, InteractionResponseBuilder.channelMessage(builder, isEphemeral: isEphemeral));
+      await createResponse(InteractionResponseBuilder.channelMessage(builder, isEphemeral: isEphemeral));
     } else {
       assert(isEphemeral == _wasEphemeral || isEphemeral == null, 'Cannot change the value of isEphemeral between acknowledge and respond');
       _didRespond = true;
@@ -213,7 +221,7 @@ mixin ModalResponse<T> on Interaction<T> {
     _didAcknowledge = true;
     _didRespond = true;
 
-    await manager.createResponse(id, token, InteractionResponseBuilder.modal(builder));
+    await createResponse(InteractionResponseBuilder.modal(builder));
   }
 }
 
@@ -245,7 +253,7 @@ class PingInteraction extends Interaction<void> {
   }) : super(data: null);
 
   /// Send a pong response to this interaction.
-  Future<void> respond() => manager.createResponse(id, token, InteractionResponseBuilder.pong());
+  Future<void> respond() => createResponse(InteractionResponseBuilder.pong());
 }
 
 /// {@template application_command_interaction}
@@ -322,9 +330,9 @@ class MessageComponentInteraction extends Interaction<MessageComponentInteractio
     _wasEphemeral = isEphemeral;
 
     if (updateMessage == true) {
-      await manager.createResponse(id, token, InteractionResponseBuilder.deferredUpdateMessage());
+      await createResponse(InteractionResponseBuilder.deferredUpdateMessage());
     } else {
-      await manager.createResponse(id, token, InteractionResponseBuilder.deferredChannelMessage(isEphemeral: isEphemeral));
+      await createResponse(InteractionResponseBuilder.deferredChannelMessage(isEphemeral: isEphemeral));
     }
   }
 
@@ -345,9 +353,9 @@ class MessageComponentInteraction extends Interaction<MessageComponentInteractio
       _wasEphemeral = isEphemeral;
 
       if (updateMessage == true) {
-        await manager.createResponse(id, token, InteractionResponseBuilder.updateMessage(builder as MessageUpdateBuilder));
+        await createResponse(InteractionResponseBuilder.updateMessage(builder as MessageUpdateBuilder));
       } else {
-        await manager.createResponse(id, token, InteractionResponseBuilder.channelMessage(builder as MessageBuilder, isEphemeral: isEphemeral));
+        await createResponse(InteractionResponseBuilder.channelMessage(builder as MessageBuilder, isEphemeral: isEphemeral));
       }
     } else {
       assert(updateMessage == _didUpdateMessage || updateMessage == null, 'Cannot change the value of updateMessage between acknowledge and respond');
@@ -422,8 +430,7 @@ class ApplicationCommandAutocompleteInteraction extends Interaction<ApplicationC
   });
 
   /// Send a response to this interaction.
-  Future<void> respond(List<CommandOptionChoiceBuilder<dynamic>> builders) =>
-      manager.createResponse(id, token, InteractionResponseBuilder.autocompleteResult(builders));
+  Future<void> respond(List<CommandOptionChoiceBuilder<dynamic>> builders) => createResponse(InteractionResponseBuilder.autocompleteResult(builders));
 }
 
 /// The type of an interaction.
