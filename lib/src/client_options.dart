@@ -21,6 +21,7 @@ import 'package:nyxx/src/models/user/user.dart';
 import 'package:nyxx/src/models/voice/voice_state.dart';
 import 'package:nyxx/src/models/webhook.dart';
 import 'package:nyxx/src/plugin/plugin.dart';
+import 'package:shelf/shelf.dart' show Request, Response;
 
 /// Options for controlling the behavior of a [Nyxx] client.
 abstract class ClientOptions {
@@ -134,6 +135,37 @@ class GatewayClientOptions extends RestClientOptions {
   /// Create a new [GatewayClientOptions].
   const GatewayClientOptions({
     this.minimumSessionStarts = 10,
+    super.plugins,
+    super.loggerName,
+    super.userCacheConfig,
+    super.channelCacheConfig,
+    super.messageCacheConfig,
+    super.webhookCacheConfig,
+    super.guildCacheConfig,
+    super.memberCacheConfig,
+    super.roleCacheConfig,
+    super.stageInstanceCacheConfig,
+    super.scheduledEventCacheConfig,
+    super.autoModerationRuleConfig,
+    super.integrationConfig,
+    super.auditLogEntryConfig,
+    super.voiceStateConfig,
+    super.applicationCommandConfig,
+    super.commandPermissionsConfig,
+    super.entitlementConfig,
+  });
+}
+
+Future<Response> _onInvalidRequest(Request _) => Future.value(Response.unauthorized('invalid request signature'));
+
+/// Options for controlling the behavior of a [NyxxHttpInteractions] client.
+class HttpInteractionsClientOptions extends RestClientOptions {
+  /// The handler that called to return response if request does not comes from Discord.
+  final Future<Response> Function(Request request) onInvalidRequest;
+
+  /// Create a new [HttpInteractionsClientOptions].
+  const HttpInteractionsClientOptions({
+    this.onInvalidRequest = _onInvalidRequest,
     super.plugins,
     super.loggerName,
     super.userCacheConfig,

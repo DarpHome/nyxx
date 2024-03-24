@@ -1,6 +1,7 @@
-export 'src/api_options.dart' show ApiOptions, RestApiOptions, GatewayApiOptions, GatewayCompression, GatewayPayloadFormat, OAuth2ApiOptions;
-export 'src/client.dart' show Nyxx, NyxxRest, NyxxGateway, NyxxOAuth2;
-export 'src/client_options.dart' show ClientOptions, RestClientOptions, GatewayClientOptions;
+export 'src/api_options.dart'
+    show ApiOptions, RestApiOptions, GatewayApiOptions, GatewayCompression, GatewayPayloadFormat, OAuth2ApiOptions, HttpInteractionsApiOptions;
+export 'src/client.dart' show Nyxx, NyxxRest, NyxxGateway, NyxxOAuth2, NyxxHttpInteractions;
+export 'src/client_options.dart' show ClientOptions, RestClientOptions, GatewayClientOptions, HttpInteractionsClientOptions;
 export 'src/errors.dart'
     show
         NyxxException,
@@ -320,6 +321,7 @@ export 'src/plugin/plugin.dart' show NyxxPlugin, NyxxPluginState;
 export 'src/plugin/logging.dart' show Logging, logging;
 export 'src/plugin/cli_integration.dart' show CliIntegration, cliIntegration;
 export 'src/plugin/ignore_exceptions.dart' show IgnoreExceptions, ignoreExceptions;
+// export 'src/http_interactions/http_interactions.dart' show;
 
 // Types also used in the nyxx API from other packages
 export 'package:http/http.dart'

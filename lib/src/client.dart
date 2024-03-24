@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
+import 'package:nyxx/src/builders/interaction_response.dart';
 import 'package:nyxx/src/builders/presence.dart';
 import 'package:nyxx/src/builders/voice.dart';
 import 'package:nyxx/src/client_options.dart';
@@ -15,12 +18,14 @@ import 'package:nyxx/src/manager_mixin.dart';
 import 'package:nyxx/src/api_options.dart';
 import 'package:nyxx/src/models/application.dart';
 import 'package:nyxx/src/models/guild/guild.dart';
+import 'package:nyxx/src/models/interaction.dart';
 import 'package:nyxx/src/models/snowflake.dart';
 import 'package:nyxx/src/models/user/user.dart';
 import 'package:nyxx/src/plugin/plugin.dart';
 import 'package:nyxx/src/utils/flags.dart';
 import 'package:oauth2/oauth2.dart';
 import 'package:runtime_type/runtime_type.dart';
+import 'package:shelf/shelf.dart' show Request, Response;
 
 /// A helper function to nest and execute calls to plugin connect methods.
 Future<T> _doConnect<T extends Nyxx>(ApiOptions apiOptions, ClientOptions clientOptions, Future<T> Function() connect, List<NyxxPlugin> plugins) {
@@ -153,6 +158,29 @@ abstract class Nyxx {
 
       final gatewayBot = await gatewayManager.fetchGatewayBot();
       return client..gateway = await Gateway.connect(client, gatewayBot);
+    }, clientOptions.plugins);
+  }
+
+  /// Create an instance of [NyxxHttpInteractions] that can perform requests to the HTTP API and is
+  /// authenticated with a bot token.
+  static Future<NyxxHttpInteractions> serveHttpInteractions(String token, List<int> publicKey,
+          {HttpInteractionsClientOptions options = const HttpInteractionsClientOptions()}) =>
+      serveHttpInteractionsWithOptions(HttpInteractionsApiOptions(token: token, publicKey: publicKey), options);
+
+  /// Create an instance of [NyxxHttpInteractions] using the provided options.
+  static Future<NyxxHttpInteractions> serveHttpInteractionsWithOptions(HttpInteractionsApiOptions apiOptions,
+      [HttpInteractionsClientOptions clientOptions = const HttpInteractionsClientOptions()]) async {
+    clientOptions.logger
+      ..info('Serving HTTP interactions server')
+      ..fine('Token: ${apiOptions.token}, Authorization: ${apiOptions.authorizationHeader}, User-Agent: ${apiOptions.userAgent}')
+      ..fine('Plugins: ${clientOptions.plugins.map((plugin) => plugin.name).join(', ')}');
+
+    return _doConnect(apiOptions, clientOptions, () async {
+      final client = NyxxHttpInteractions._(apiOptions, clientOptions);
+
+      return client
+        .._application = await client.applications.fetchCurrentApplication()
+        .._user = await client.users.fetchCurrentUser();
     }, clientOptions.plugins);
   }
 
@@ -320,5 +348,132 @@ class NyxxGateway with ManagerMixin, EventMixin implements NyxxRest {
       await gateway.close();
       httpHandler.close();
     }, options.plugins);
+  }
+}
+
+class NyxxHttpInteractions with ManagerMixin implements NyxxRest {
+  @override
+  final HttpInteractionsApiOptions apiOptions;
+
+  @override
+  final HttpInteractionsClientOptions options;
+
+  @override
+  late final HttpHandler httpHandler = HttpHandler(this);
+
+  @override
+  Logger get logger => options.logger;
+
+  @override
+  final Completer<void> _initializedCompleter = Completer();
+
+  final Ed25519 _ed25519;
+  final PublicKey _publicKey;
+
+  final List<Future<InteractionResponseBuilder?> Function(Interaction<dynamic>)> _handlers = [];
+
+  NyxxHttpInteractions._(this.apiOptions, this.options)
+      : _ed25519 = Ed25519(),
+        _publicKey = SimplePublicKey(apiOptions.publicKey, type: KeyPairType.ed25519);
+
+  /// Add the current user to the thread with the ID [id].
+  ///
+  /// External references:
+  /// * [ChannelManager.joinThread]
+  /// * Discord API Reference: https://discord.com/developers/docs/resources/channel#join-thread
+  @override
+  Future<void> joinThread(Snowflake id) => channels.joinThread(id);
+
+  /// Remove the current user from the thread with the ID [id].
+  ///
+  /// External references:
+  /// * [ChannelManager.leaveThread]
+  /// * Discord API Reference: https://discord.com/developers/docs/resources/channel#leave-thread
+  @override
+  Future<void> leaveThread(Snowflake id) => channels.leaveThread(id);
+
+  /// List the guilds the current user is a member of.
+  @override
+  Future<List<UserGuild>> listGuilds({Snowflake? before, Snowflake? after, int? limit}) =>
+      users.listCurrentUserGuilds(before: before, after: after, limit: limit);
+
+  @override
+  Future<void> close() {
+    logger.info('Closing client');
+    return _doClose(this, () async => httpHandler.close(), options.plugins);
+  }
+
+  @override
+  late final PartialApplication _application;
+
+  @override
+  late final PartialUser _user;
+
+  @override
+  PartialApplication get application => _application;
+
+  @override
+  PartialUser get user => _user;
+
+  void _onInteractionCreate<T extends Interaction<U>, U>(Future<InteractionResponseBuilder?> Function(T) handler) {
+    _handlers.add((interaction) async {
+      if (interaction is T) {
+        return handler(interaction);
+      }
+      return null;
+    });
+  }
+
+  void onInteractionCreate(Future<InteractionResponseBuilder?> Function(PingInteraction) handler) => _onInteractionCreate(handler);
+  void onPingInteraction(Future<InteractionResponseBuilder?> Function(PingInteraction) handler) => _onInteractionCreate(handler);
+  void onApplicationCommandInteraction(Future<InteractionResponseBuilder?> Function(ApplicationCommandInteraction) handler) => _onInteractionCreate(handler);
+  void onMessageComponentInteraction(Future<InteractionResponseBuilder?> Function(MessageComponentInteraction) handler) => _onInteractionCreate(handler);
+  void onModalSubmitInteraction(Future<InteractionResponseBuilder?> Function(ModalSubmitInteraction) handler) => _onInteractionCreate(handler);
+  void onApplicationCommandAutocompleteInteraction(Future<InteractionResponseBuilder?> Function(ApplicationCommandAutocompleteInteraction) handler) =>
+      _onInteractionCreate(handler);
+
+  Future<Response> handle(Request request) async {
+    if (request.headers
+        case {
+          'x-signature-ed25519': String signature,
+          'x-signature-timestamp': String timestamp,
+        }) {
+      if (signature.length != 128) {
+        return await options.onInvalidRequest(request);
+      }
+      List<int> sig = [];
+      for (var i = 0; i < 64; ++i) {
+        var b = int.tryParse(signature.substring(i * 2, i * 2 + 2), radix: 16);
+        if (b == null) {
+          return await options.onInvalidRequest(request);
+        }
+        sig.add(b);
+      }
+      final body = await request.readAsString();
+      if (!await _ed25519.verifyString(timestamp + body, signature: Signature(sig, publicKey: _publicKey))) {
+        return await options.onInvalidRequest(request);
+      }
+      late Map<String, Object?> json;
+      try {
+        json = jsonDecode(body) as Map<String, Object?>;
+      } catch (_) {
+        return Response.badRequest();
+      }
+      final interaction = interactions.parse(json);
+      InteractionResponseBuilder? responseBuilder;
+      for (final handler in _handlers) {
+        responseBuilder = await handler(interaction);
+        if (responseBuilder != null) break;
+      }
+      if (interaction is PingInteraction && responseBuilder == null) {
+        responseBuilder = InteractionResponseBuilder.pong();
+      }
+      if (responseBuilder == null) {
+        return Response.internalServerError(body: 'No interaction handler was found.');
+      }
+      return Response.ok(jsonEncode(responseBuilder.build()), headers: {'content-type': 'application/json'});
+    } else {
+      return await options.onInvalidRequest(request);
+    }
   }
 }

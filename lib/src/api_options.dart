@@ -146,3 +146,12 @@ enum GatewayCompression {
   /// Cannot be used if [GatewayPayloadFormat.etf] is used.
   payload,
 }
+
+/// Options for serving the interactions server.
+class HttpInteractionsApiOptions extends RestApiOptions {
+  /// The public key used to verify whether request comes from Discord.
+  final List<int> publicKey;
+
+  /// Create a new [HttpInteractionsApiOptions].
+  HttpInteractionsApiOptions({required super.token, required this.publicKey, super.userAgent});
+}
