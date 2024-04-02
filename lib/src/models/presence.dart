@@ -122,7 +122,8 @@ enum ActivityType {
   listening._(2),
   watching._(3),
   custom._(4),
-  competing._(5);
+  competing._(5),
+  hangStatus._(6);
 
   /// The value of this [ActivityType].
   final int value;
