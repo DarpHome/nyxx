@@ -10,6 +10,9 @@ import 'package:nyxx/src/utils/to_string_helper/to_string_helper.dart';
 /// If the invite is to a [Channel], this will be a [GroupDmChannel].
 /// {@endtemplate}
 class Invite with ToStringHelper {
+  /// The invite's type.
+  final InviteType type;
+
   /// The invite's code. This is a unique identifier.
   final String code;
 
@@ -54,6 +57,7 @@ class Invite with ToStringHelper {
   /// {@macro invite}
   /// @nodoc
   Invite({
+    required this.type,
     required this.code,
     required this.guild,
     required this.channel,
@@ -91,4 +95,32 @@ enum TargetType {
 
   @override
   String toString() => 'TargetType($value)';
+}
+
+/// The type of an [Invite].
+enum InviteType {
+  /// The invite is guild invite.
+  guild._(0),
+
+  /// The invite is group DM invite.
+  groupDm._(1),
+
+  /// The invite is friend invite.
+  friend._(2);
+
+  /// The value of this [InviteType].
+  final int value;
+
+  /// Parse a [InviteType] from an [int].
+  ///
+  /// The [value] must be a valid target type.
+  factory InviteType.parse(int value) => InviteType.values.firstWhere(
+        (type) => type.value == value,
+        orElse: () => throw FormatException('Unknown InviteType', value),
+      );
+
+  const InviteType._(this.value);
+
+  @override
+  String toString() => 'InviteType($value)';
 }
