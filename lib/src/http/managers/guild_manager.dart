@@ -257,7 +257,7 @@ class GuildManager extends Manager<Guild> {
       prompts: parseMany(raw['prompts'] as List, (Map<String, Object?> raw) => parseOnboardingPrompt(raw, guildId: guildId)),
       defaultChannelIds: parseMany(raw['default_channel_ids'] as List, Snowflake.parse),
       isEnabled: raw['enabled'] as bool,
-      mode: OnboardingMode.parse(raw['mode'] as int),
+      mode: maybeParse(raw['mode'] as int?, OnboardingMode.parse) ?? OnboardingMode.onboardingDefault,
     );
   }
 
