@@ -5,6 +5,31 @@ import 'package:nyxx/src/models/guild/guild.dart';
 import 'package:nyxx/src/models/snowflake.dart';
 import 'package:nyxx/src/utils/to_string_helper/to_string_helper.dart';
 
+/// The mode of a onboarding.
+///
+/// External references:
+/// * Discord API Reference: https://discord.com/developers/docs/resources/guild#guild-onboarding-object-onboarding-mode
+enum OnboardingMode {
+  onboardingDefault._(0),
+  onboardingAdvanced._(1);
+
+  /// The value of this [OnboardingMode].
+  final int value;
+
+  const OnboardingMode._(this.value);
+
+  /// Parse a [OnboardingMode] from an [int].
+  ///
+  /// [value] must be a valid [OnboardingMode].
+  factory OnboardingMode.parse(int value) => OnboardingMode.values.firstWhere(
+        (type) => type.value == value,
+        orElse: () => throw FormatException('Unknown OnboardingMode', value),
+      );
+
+  @override
+  String toString() => 'OnboardingMode($value)';
+}
+
 /// {@template onboarding}
 /// The configuration for a [Guild]'s onboarding process.
 /// {@endtemplate}
@@ -24,6 +49,9 @@ class Onboarding with ToStringHelper {
   /// Whether onboarding is enabled for this guild.
   final bool isEnabled;
 
+  /// The current mode of onboarding.
+  final OnboardingMode mode;
+
   /// {@macro onboarding}
   /// @nodoc
   Onboarding({
@@ -32,6 +60,7 @@ class Onboarding with ToStringHelper {
     required this.prompts,
     required this.defaultChannelIds,
     required this.isEnabled,
+    required this.mode,
   });
 
   /// The guild this onboarding is for.
