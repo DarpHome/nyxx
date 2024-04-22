@@ -87,13 +87,15 @@ class GuildAnnouncementChannel extends TextChannel implements GuildChannel, HasT
   PartialChannel? get parent => parentId == null ? null : manager.client.channels[parentId!];
 
   @override
-  Future<Thread> createThread(ThreadBuilder builder) => manager.createThread(id, builder);
+  Future<Thread> createThread(ThreadBuilder builder, {String? auditLogReason}) => manager.createThread(id, builder, auditLogReason: auditLogReason);
 
   @override
-  Future<Thread> createThreadFromMessage(Snowflake messageId, ThreadFromMessageBuilder builder) => manager.createThreadFromMessage(id, messageId, builder);
+  Future<Thread> createThreadFromMessage(Snowflake messageId, ThreadFromMessageBuilder builder, {String? auditLogReason}) =>
+      manager.createThreadFromMessage(id, messageId, builder, auditLogReason: auditLogReason);
 
   @override
-  Future<void> deletePermissionOverwrite(Snowflake id) => manager.deletePermissionOverwrite(this.id, id);
+  Future<void> deletePermissionOverwrite(Snowflake id, {String? auditLogReason}) =>
+      manager.deletePermissionOverwrite(this.id, id, auditLogReason: auditLogReason);
 
   @override
   Future<ThreadList> listPrivateArchivedThreads({DateTime? before, int? limit}) => manager.listPrivateArchivedThreads(id, before: before, limit: limit);
@@ -106,7 +108,8 @@ class GuildAnnouncementChannel extends TextChannel implements GuildChannel, HasT
       manager.listJoinedPrivateArchivedThreads(id, before: before, limit: limit);
 
   @override
-  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder) => manager.updatePermissionOverwrite(id, builder);
+  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder, {String? auditLogReason}) =>
+      manager.updatePermissionOverwrite(id, builder, auditLogReason: auditLogReason);
 
   @override
   Future<List<Webhook>> fetchWebhooks() => manager.client.webhooks.fetchChannelWebhooks(id);

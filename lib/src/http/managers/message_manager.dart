@@ -432,7 +432,7 @@ class MessageManager extends Manager<Message> {
     final route = HttpRoute()
       ..channels(id: channelId.toString())
       ..messages(id: id.toString());
-    final request = BasicRequest(route, method: 'DELETE');
+    final request = BasicRequest(route, method: 'DELETE', auditLogReason: auditLogReason);
 
     await client.httpHandler.executeSafe(request);
 

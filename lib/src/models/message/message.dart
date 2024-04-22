@@ -40,6 +40,14 @@ class PartialMessage extends WritableSnowflakeEntity<Message> {
   /// The channel this message was sent in.
   PartialTextChannel get channel => manager.client.channels[channelId] as PartialTextChannel;
 
+  /// Delete this message.
+  ///
+  /// External references:
+  /// * [MessageManager.delete]
+  /// * Discord API Reference: https://discord.com/developers/docs/resources/channel#delete-message
+  @override
+  Future<void> delete({String? auditLogReason}) => manager.delete(id, auditLogReason: auditLogReason);
+
   /// Update this message.
   // An often-used alias to update
   Future<Message> edit(MessageUpdateBuilder builder) => update(builder);

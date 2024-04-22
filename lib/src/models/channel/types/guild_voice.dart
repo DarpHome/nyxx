@@ -88,10 +88,12 @@ class GuildVoiceChannel extends TextChannel implements GuildChannel, VoiceChanne
   PartialChannel? get parent => parentId == null ? null : manager.client.channels[parentId!];
 
   @override
-  Future<void> deletePermissionOverwrite(Snowflake id) => manager.deletePermissionOverwrite(this.id, id);
+  Future<void> deletePermissionOverwrite(Snowflake id, {String? auditLogReason}) =>
+      manager.deletePermissionOverwrite(this.id, id, auditLogReason: auditLogReason);
 
   @override
-  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder) => manager.updatePermissionOverwrite(id, builder);
+  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder, {String? auditLogReason}) =>
+      manager.updatePermissionOverwrite(id, builder, auditLogReason: auditLogReason);
 
   @override
   Future<List<Webhook>> fetchWebhooks() => manager.client.webhooks.fetchChannelWebhooks(id);

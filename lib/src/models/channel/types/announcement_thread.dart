@@ -122,7 +122,8 @@ class AnnouncementThread extends TextChannel implements Thread {
   Future<void> addThreadMember(Snowflake memberId) => manager.addThreadMember(id, memberId);
 
   @override
-  Future<void> deletePermissionOverwrite(Snowflake id) => manager.deletePermissionOverwrite(this.id, id);
+  Future<void> deletePermissionOverwrite(Snowflake id, {String? auditLogReason}) =>
+      manager.deletePermissionOverwrite(this.id, id, auditLogReason: auditLogReason);
 
   @override
   Future<ThreadMember> fetchThreadMember(Snowflake memberId) => manager.fetchThreadMember(id, memberId);
@@ -135,7 +136,8 @@ class AnnouncementThread extends TextChannel implements Thread {
   Future<void> removeThreadMember(Snowflake memberId) => manager.removeThreadMember(id, memberId);
 
   @override
-  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder) => manager.updatePermissionOverwrite(id, builder);
+  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder, {String? auditLogReason}) =>
+      manager.updatePermissionOverwrite(id, builder, auditLogReason: auditLogReason);
 
   @override
   Future<List<Webhook>> fetchWebhooks() => manager.client.webhooks.fetchChannelWebhooks(id);

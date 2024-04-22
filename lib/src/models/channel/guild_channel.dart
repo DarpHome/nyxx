@@ -41,14 +41,14 @@ abstract class GuildChannel implements Channel {
   /// External references:
   /// * [ChannelManager.updatePermissionOverwrite]
   /// * Discord API Reference: https://discord.com/developers/docs/resources/channel#edit-channel-permissions
-  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder);
+  Future<void> updatePermissionOverwrite(PermissionOverwriteBuilder builder, {String? auditLogReason});
 
   /// Remove a permission overwrite from this channel.
   ///
   /// External references:
   /// * [ChannelManager.deletePermissionOverwrite]
   /// * Discord API Reference: https://discord.com/developers/docs/resources/channel#delete-channel-permission
-  Future<void> deletePermissionOverwrite(Snowflake id);
+  Future<void> deletePermissionOverwrite(Snowflake id, {String? auditLogReason});
 
   /// List the webhooks in this channel.
   Future<List<Webhook>> fetchWebhooks();
