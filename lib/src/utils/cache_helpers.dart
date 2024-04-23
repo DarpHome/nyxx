@@ -105,6 +105,7 @@ extension CacheUpdates on NyxxRest {
             updateCacheWith(entity.author);
             entity.mentions.forEach(updateCacheWith);
             updateCacheWith(entity.referencedMessage);
+            // ignore: deprecated_member_use_from_same_package
             updateCacheWith(entity.interaction);
             updateCacheWith(entity.thread);
             updateCacheWith(entity.resolved);
@@ -131,6 +132,10 @@ extension CacheUpdates on NyxxRest {
         ThreadMember(:final member) => updateCacheWith(member),
         // ignore: deprecated_member_use_from_same_package
         MessageInteraction(:final user) => updateCacheWith(user),
+        MessageInteractionMetadata(:final user, :final triggeringInteractionMetadata) => () {
+            updateCacheWith(user);
+            updateCacheWith(triggeringInteractionMetadata);
+          }(),
         ResolvedData(:final users, :final roles, :final members) => () {
             users?.values.forEach(updateCacheWith);
             roles?.values.forEach(updateCacheWith);

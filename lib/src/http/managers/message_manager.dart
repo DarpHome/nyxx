@@ -324,7 +324,7 @@ class MessageManager extends Manager<Message> {
     return MessageInteractionMetadata(
       id: Snowflake.parse(raw['id']!),
       type: InteractionType.parse(raw['type'] as int),
-      userId: Snowflake.parse(raw['user_id']!),
+      user: client.users.parse(raw['user'] as Map<String, Object?>),
       authorizingIntegrationOwners: {
         for (final MapEntry(:key, :value) in (raw['authorizing_integration_owners'] as Map<String, Object?>).entries)
           ApplicationIntegrationType.parse(int.parse(key)): Snowflake.parse(value!),

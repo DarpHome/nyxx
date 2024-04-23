@@ -395,7 +395,8 @@ final sampleOnboarding = {
     "998678683592171602",
     "998678699715067986"
   ],
-  "enabled": true
+  "enabled": true,
+  "mode": 0
 };
 
 void checkOnboarding(Onboarding onboarding) {

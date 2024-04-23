@@ -420,8 +420,11 @@ class MessageInteractionMetadata with ToStringHelper {
   /// The type of the interaction.
   final InteractionType type;
 
+  /// The user that triggered the interaction.
+  final User user;
+
   /// ID of the user that triggered the interaction.
-  final Snowflake userId;
+  Snowflake get userId => user.id;
 
   /// IDs for installation context(s) related to an interaction.
   final Map<ApplicationIntegrationType, Snowflake> authorizingIntegrationOwners;
@@ -440,7 +443,7 @@ class MessageInteractionMetadata with ToStringHelper {
   MessageInteractionMetadata({
     required this.id,
     required this.type,
-    required this.userId,
+    required this.user,
     required this.authorizingIntegrationOwners,
     required this.originalResponseMessageId,
     required this.interactedMessageId,
