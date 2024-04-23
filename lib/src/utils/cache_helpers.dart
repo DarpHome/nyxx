@@ -81,8 +81,9 @@ extension CacheUpdates on NyxxRest {
         ApplicationCommand() => entity.manager.cache[entity.id] = entity,
         AutoModerationRule() => entity.manager.cache[entity.id] = entity,
         Emoji() => () {
+            entity.manager.cache[entity.id] = entity;
+
             if (entity case GuildEmoji(:final user?)) {
-              entity.manager.cache[entity.id] = entity;
               updateCacheWith(user);
             }
           }(),
