@@ -143,7 +143,18 @@ void checkCrosspostedMessage(Message message) {
 final sampleMessageInteractionMetadata = {
   "id": "1234567891234567800",
   "type": 2,
-  "user_id": "1234567891234567801",
+  "user": {
+    "id": "1234567891234567801",
+    "username": "nyxxtester1",
+    "avatar": null,
+    "discriminator": "0",
+    "public_flags": 2,
+    "flags": 2,
+    "bot": false,
+    "banner": null,
+    "accent_color": null,
+    "global_name": null,
+  },
   "authorizing_integration_owners": {
     "0": "1234567891234567802",
     "1": "1234567891234567803",
@@ -153,7 +164,18 @@ final sampleMessageInteractionMetadata = {
   "triggering_interaction_metadata": {
     "id": "1234567891234567806",
     "type": 2,
-    "user_id": "1234567891234567807",
+    "user": {
+      "id": "1234567891234567807",
+      "username": "nyxxtester2",
+      "avatar": null,
+      "discriminator": "0",
+      "public_flags": 2,
+      "flags": 2,
+      "bot": false,
+      "banner": null,
+      "accent_color": null,
+      "global_name": null,
+    },
     "authorizing_integration_owners": {
       "0": "1234567891234567808",
       "1": "1234567891234567809",
@@ -165,6 +187,18 @@ void checkMessageInteractionMetadata(MessageInteractionMetadata metadata) {
   expect(metadata.id, equals(Snowflake(1234567891234567800)));
   expect(metadata.type, equals(InteractionType.applicationCommand));
   expect(metadata.userId, equals(Snowflake(1234567891234567801)));
+  expect(metadata.user.id, equals(Snowflake(1234567891234567801)));
+  expect(metadata.user.username, equals("nyxxtester1"));
+  expect(metadata.user.avatarHash, isNull);
+  expect(metadata.user.discriminator, equals("0"));
+  expect(metadata.user.publicFlags, isNotNull);
+  expect(metadata.user.publicFlags!.isPartner, isTrue);
+  expect(metadata.user.flags, isNotNull);
+  expect(metadata.user.flags!.isPartner, isTrue);
+  expect(metadata.user.isBot, isFalse);
+  expect(metadata.user.bannerHash, isNull);
+  expect(metadata.user.accentColor, isNull);
+  expect(metadata.user.globalName, isNull);
   expect(
       metadata.authorizingIntegrationOwners,
       equals({
@@ -178,6 +212,18 @@ void checkMessageInteractionMetadata(MessageInteractionMetadata metadata) {
   expect(metadata2.id, equals(Snowflake(1234567891234567806)));
   expect(metadata2.type, equals(InteractionType.applicationCommand));
   expect(metadata2.userId, equals(Snowflake(1234567891234567807)));
+  expect(metadata2.user.id, equals(Snowflake(1234567891234567807)));
+  expect(metadata2.user.username, equals("nyxxtester2"));
+  expect(metadata2.user.avatarHash, isNull);
+  expect(metadata2.user.discriminator, equals("0"));
+  expect(metadata2.user.publicFlags, isNotNull);
+  expect(metadata2.user.publicFlags!.isPartner, isTrue);
+  expect(metadata2.user.flags, isNotNull);
+  expect(metadata2.user.flags!.isPartner, isTrue);
+  expect(metadata2.user.isBot, isFalse);
+  expect(metadata2.user.bannerHash, isNull);
+  expect(metadata2.user.accentColor, isNull);
+  expect(metadata2.user.globalName, isNull);
   expect(
       metadata2.authorizingIntegrationOwners,
       equals({
