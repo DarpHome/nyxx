@@ -93,29 +93,29 @@ class OnboardingPromptBuilder extends CreateBuilder<OnboardingPrompt> {
 
 class OnboardingBuilder extends CreateBuilder<Onboarding> {
   /// The list of prompts shown during onboarding and in customize community.
-  List<OnboardingPromptBuilder> prompts;
+  List<OnboardingPromptBuilder>? prompts;
 
   /// The list of channel IDs that members get opted into automatically.
-  List<Snowflake> defaultChannelIds;
+  List<Snowflake>? defaultChannelIds;
 
   /// Whether onboarding is enabled in the guild.
-  bool isEnabled;
+  bool? isEnabled;
 
   /// The mode of onboarding.
-  OnboardingMode mode;
+  OnboardingMode? mode;
 
   OnboardingBuilder({
-    required this.prompts,
-    required this.defaultChannelIds,
-    this.isEnabled = true,
-    this.mode = OnboardingMode.onboardingDefault,
+    this.prompts,
+    this.defaultChannelIds,
+    this.isEnabled,
+    this.mode,
   });
 
   @override
   Map<String, Object?> build() => {
-        'prompts': prompts.map((p) => p.build()).toList(),
-        'default_channel_ids': defaultChannelIds.map((s) => s.toString()).toList(),
-        'enabled': isEnabled,
-        'mode': mode.value,
+        if (prompts != null) 'prompts': prompts!.map((p) => p.build()).toList(),
+        if (defaultChannelIds != null) 'default_channel_ids': defaultChannelIds!.map((s) => s.toString()).toList(),
+        if (isEnabled != null) 'enabled': isEnabled,
+        if (mode != null) 'mode': mode!.value,
       };
 }
