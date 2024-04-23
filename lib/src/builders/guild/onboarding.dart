@@ -36,9 +36,8 @@ class OnboardingPromptOptionBuilder extends CreateBuilder<OnboardingPromptOption
         if (id != null) 'id': id.toString(),
         'title': title,
         if (description != null) 'description': description,
-        if (emoji != null && emoji is GuildEmoji) 'emoji_id': emoji!.id.toString(),
-        if (emoji != null && emoji is GuildEmoji || emoji is TextEmoji) 'emoji_name': emoji!.name,
-        if (emoji != null && emoji is GuildEmoji) 'emoji_animated': (emoji as GuildEmoji).isAnimated == true,
+        if (emoji is GuildEmoji) 'emoji_id': emoji!.id.toString(),
+        if (emoji is TextEmoji) 'emoji_name': emoji!.name, // Guild emojis require only ID
         if (roleIds != null) 'role_ids': roleIds!.map((s) => s.toString()).toList(),
         if (channelIds != null) 'channel_ids': channelIds!.map((s) => s.toString()).toList(),
       };
@@ -57,7 +56,7 @@ class OnboardingPromptBuilder extends CreateBuilder<OnboardingPrompt> {
   /// Whether selecting an option is required.
   bool? isRequired;
 
-  /// If this prompt appears in the onboarding flow.
+  /// Whether this prompt should appear in the onboarding flow.
   ///
   /// If `false`, this prompt will only be visible in the Roles & Channels tab of the Discord client.
   bool? isInOnboarding;
