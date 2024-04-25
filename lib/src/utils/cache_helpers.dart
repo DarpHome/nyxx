@@ -107,6 +107,7 @@ extension CacheUpdates on NyxxRest {
             updateCacheWith(entity.referencedMessage);
             // ignore: deprecated_member_use_from_same_package
             updateCacheWith(entity.interaction);
+            updateCacheWith(entity.interactionMetadata);
             updateCacheWith(entity.thread);
             updateCacheWith(entity.resolved);
           }(),
