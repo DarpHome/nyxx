@@ -318,6 +318,9 @@ extension RouteHelpers on HttpRoute {
   /// Adds the [`recipients`](https://discord.com/developers/docs/resources/channel#group-dm-add-recipient) part to this [HttpRoute].
   void recipients({String? id}) => add(HttpRoutePart('recipients', [if (id != null) HttpRouteParam(id)]));
 
+  /// Adds the [`clan-badges`](https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints) part to this [HttpRoute].
+  void clanBadges({String? id}) => add(HttpRoutePart('clan-badges', [if (id != null) HttpRouteParam(id)]));
+
   /// Adds the [`bulk-ban`](https://discord.com/developers/docs/resources/guild#bulk-guild-ban) part to this [HttpRoute].
   void bulkBan() => add(HttpRoutePart('bulk-ban'));
 }

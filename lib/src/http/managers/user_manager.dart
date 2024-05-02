@@ -55,6 +55,18 @@ class UserManager extends ReadOnlyManager<User> {
       nitroType: hasPremiumType ? NitroType.parse(raw['premium_type'] as int) : NitroType.none,
       publicFlags: hasPublicFlags ? UserFlags(raw['public_flags'] as int) : null,
       avatarDecorationHash: raw['avatar_decoration'] as String?,
+      clan: maybeParse(raw['clan'], parseUserClan),
+    );
+  }
+
+  /// Parse a [UserClan] from [raw].
+  UserClan parseUserClan(Map<String, Object?> raw) {
+    return UserClan(
+      manager: this,
+      identityGuildId: Snowflake.parse(raw['identify_guild_id']!),
+      isIdentityEnabled: raw['identity_enabled'] as bool,
+      tag: raw['tag'] as String,
+      badgeHash: raw['badge'] as String,
     );
   }
 

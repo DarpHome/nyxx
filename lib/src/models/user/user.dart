@@ -5,8 +5,10 @@ import 'package:nyxx/src/models/commands/application_command_option.dart';
 import 'package:nyxx/src/models/discord_color.dart';
 import 'package:nyxx/src/models/locale.dart';
 import 'package:nyxx/src/models/message/author.dart';
+import 'package:nyxx/src/models/snowflake.dart';
 import 'package:nyxx/src/models/snowflake_entity/snowflake_entity.dart';
 import 'package:nyxx/src/utils/flags.dart';
+import 'package:nyxx/src/utils/to_string_helper/to_string_helper.dart';
 
 /// A partial [User] object.
 class PartialUser extends ManagedSnowflakeEntity<User> {
@@ -16,6 +18,37 @@ class PartialUser extends ManagedSnowflakeEntity<User> {
   /// Create a new [PartialUser].
   /// @nodoc
   PartialUser({required super.id, required this.manager});
+}
+
+class UserClan with ToStringHelper {
+  final UserManager manager;
+
+  /// The ID of the user's primary clan.
+  final Snowflake identityGuildId;
+
+  /// Whether the user is displaying their clan tag.
+  final bool isIdentityEnabled;
+
+  /// The text of the user's clan tag. Limited to 4 characters.
+  final String tag;
+
+  /// The hash of clan badge.
+  final String badgeHash;
+
+  UserClan({
+    required this.manager,
+    required this.identityGuildId,
+    required this.isIdentityEnabled,
+    required this.tag,
+    required this.badgeHash,
+  });
+
+  /// This clan's badge.
+  CdnAsset get badge => CdnAsset(
+        client: manager.client,
+        base: HttpRoute()..clanBadges(id: identityGuildId.toString()),
+        hash: badgeHash,
+      );
 }
 
 /// {@template user}
@@ -72,6 +105,9 @@ class User extends PartialUser implements MessageAuthor, CommandOptionMentionabl
   /// The hash of this user's avatar decoration.
   final String? avatarDecorationHash;
 
+  /// The user's clan data.
+  final UserClan? clan;
+
   /// {@macro user}
   /// @nodoc
   User({
@@ -91,6 +127,7 @@ class User extends PartialUser implements MessageAuthor, CommandOptionMentionabl
     required this.nitroType,
     required this.publicFlags,
     required this.avatarDecorationHash,
+    required this.clan,
   });
 
   /// This user's banner.
