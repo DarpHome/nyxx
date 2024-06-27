@@ -6,20 +6,20 @@ import '../../../mocks/client.dart';
 import '../../../test_endpoint.dart';
 import '../../../test_manager.dart';
 
-final sampleGateway = {"url": "wss://gateway.discord.gg/"};
+final sampleGateway = {"url": "wss://gateway.old.server.spacebar.chat/"};
 
 void checkGateway(GatewayConfiguration configuration) {
-  expect(configuration.url, equals(Uri(scheme: 'wss', host: 'gateway.discord.gg', path: '/')));
+  expect(configuration.url, equals(Uri(scheme: 'wss', host: 'gateway.old.server.spacebar.chat', path: '/')));
 }
 
 final sampleGatewayBot = {
-  "url": "wss://gateway.discord.gg/",
+  "url": "wss://gateway.old.server.spacebar.chat/",
   "shards": 9,
   "session_start_limit": {"total": 1000, "remaining": 999, "reset_after": 14400000, "max_concurrency": 1}
 };
 
 void checkGatewayBot(GatewayBot gateway) {
-  expect(gateway.url, equals(Uri(scheme: 'wss', host: 'gateway.discord.gg', path: '/')));
+  expect(gateway.url, equals(Uri(scheme: 'wss', host: 'gateway.old.server.spacebar.chat', path: '/')));
   expect(gateway.shards, equals(9));
   expect(gateway.sessionStartLimit.total, equals(1000));
   expect(gateway.sessionStartLimit.remaining, equals(999));

@@ -29,7 +29,7 @@ class ReadyEvent extends DispatchEvent {
   final int? totalShards;
 
   /// The client's application.
-  final PartialApplication application;
+  final PartialApplication? application;
 
   /// {@macro ready_event}
   /// @nodoc

@@ -17,7 +17,7 @@ abstract class ApiOptions {
   /// The host at which the API can be found.
   ///
   /// This is always `discord.com`.
-  String get host => 'discord.com';
+  String get host => 'api.old.server.spacebar.chat';
 
   /// The base URI relative to the [host] where the API can be found.
   String get baseUri => '/api/v$apiVersion';
@@ -34,22 +34,25 @@ abstract class ApiOptions {
   /// The host at which the CDN can be found.
   ///
   /// This is always `cdn.discordapp.com`.
-  String get cdnHost => 'cdn.discordapp.com';
+  String get cdnHost => 'cdn.old.server.spacebar.chat';
 
   /// Create a new [ApiOptions].
   ApiOptions({this.userAgent = defaultUserAgent});
 }
 
-/// Options for connecting to the Discord API to make HTTP requests with a bot token.
+/// Options for connecting to the Discord API to make HTTP requests with a bot/user token.
 class RestApiOptions extends ApiOptions {
   /// The token to use.
   final String token;
 
+  /// Whether this is bot token or not.
+  final bool isBot;
+
   @override
-  String get authorizationHeader => 'Bot $token';
+  String get authorizationHeader => isBot ? 'Bot $token' : token;
 
   /// Create a new [RestApiOptions].
-  RestApiOptions({required this.token, super.userAgent});
+  RestApiOptions({required this.token, this.isBot = true, super.userAgent});
 }
 
 /// Options for connecting the the Discord API using credentials from an OAuth2 flow.
@@ -59,12 +62,16 @@ class OAuth2ApiOptions extends ApiOptions implements RestApiOptions {
 
   @override
   String get token => credentials.accessToken;
+  
+  @override
+  bool get isBot => false;
 
   @override
   String get authorizationHeader => 'Bearer ${credentials.accessToken}';
 
   /// Create a new [OAuth2ApiOptions].
   OAuth2ApiOptions({required this.credentials, super.userAgent});
+
 }
 
 /// Options for connecting to the Discord API for making HTTP requests and connecting to the Gateway
